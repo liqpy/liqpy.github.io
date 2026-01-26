@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技术博客 | 探索数字世界</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 头部样式 */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 28px;
+            color: #4a6ee0;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            color: #2d3748;
+        }
+
+        .logo span {
+            color: #4a6ee0;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #4a6ee0;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #4a6ee0;
+            cursor: pointer;
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            display: flex;
+            gap: 40px;
+            padding: 40px 0;
+        }
+
+        .blog-posts {
+            flex: 2;
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        /* 博客文章样式 */
+        .post {
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .post:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-image {
+            height: 220px;
+            overflow: hidden;
+        }
+
+        .post-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .post:hover .post-image img {
+            transform: scale(1.05);
+        }
+
+        .post-content {
+            padding: 25px;
+        }
+
+        .post-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .post-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .post-title {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .post-title a {
+            text-decoration: none;
+            color: inherit;
+            transition: color 0.3s;
+        }
+
+        .post-title a:hover {
+            color: #4a6ee0;
+        }
+
+        .post-excerpt {
+            color: #4a5568;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .read-more {
+            display: inline-block;
+            background-color: #4a6ee0;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .read-more:hover {
+            background-color: #3a5bc7;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            flex: 1;
+        }
+
+        .sidebar-widget {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .widget-title {
+            font-size: 20px;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .about-widget p {
+            margin-bottom: 15px;
+            color: #4a5568;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: #f7fafc;
+            border-radius: 50%;
+            color: #4a5568;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            background-color: #4a6ee0;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .categories-list, .popular-posts-list {
+            list-style: none;
+        }
+
+        .categories-list li, .popular-posts-list li {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .categories-list a, .popular-posts-list a {
+            text-decoration: none;
+            color: #4a5568;
+            display: flex;
+            justify-content: space-between;
+            transition: color 0.3s;
+        }
+
+        .categories-list a:hover, .popular-posts-list a:hover {
+            color: #4a6ee0;
+        }
+
+        .categories-list span {
+            background-color: #e2e8f0;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .popular-post {
+            display: flex;
+            gap: 15px;
+        }
+
+        .popular-post img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .popular-post-content h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .popular-post-content span {
+            font-size: 13px;
+            color: #718096;
+        }
+
+        /* 页脚样式 */
+        footer {
+            background-color: #2d3748;
+            color: #cbd5e0;
+            padding: 50px 0 20px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .footer-column h3 {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 25px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: #a0aec0;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: #4a6ee0;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #4a5568;
+            color: #a0aec0;
+            font-size: 14px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .header-content {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                background-color: white;
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+            }
+
+            nav ul.show {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .header-content {
+                padding: 15px 0;
+            }
+
+            .logo h1 {
+                font-size: 20px;
+            }
+
+            .post-title {
+                font-size: 20px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .post-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .post-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部区域 -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-blog"></i>
+                    <h1>技术<span>博客</span></h1>
+                </div>
+                
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <nav>
+                    <ul id="mainNav">
+                        <li><a href="#"><i class="fas fa-home"></i> 首页</a></li>
+                        <li><a href="#"><i class="fas fa-folder"></i> 分类</a></li>
+                        <li><a href="#"><i class="fas fa-tags"></i> 标签</a></li>
+                        <li><a href="#"><i class="fas fa-info-circle"></i> 关于</a></li>
+                        <li><a href="#"><i class="fas fa-envelope"></i> 联系</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <main class="container">
+        <div class="main-content">
+            <!-- 博客文章部分 -->
+            <section class="blog-posts">
+                <h2 class="section-title">最新文章</h2>
+                
+                <article class="post">
+                    <div class="post-image">
+                        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="代码编辑器">
+                    </div>
+                    <div class="post-content">
+                        <div class="post-meta">
+                            <span><i class="far fa-calendar"></i> 2023年10月15日</span>
+                            <span><i class="far fa-folder"></i> 前端开发</span>
+                            <span><i class="far fa-comments"></i> 12条评论</span>
+                        </div>
+                        <h3 class="post-title"><a href="#">深入理解JavaScript闭包及其应用场景</a></h3>
+                        <p class="post-excerpt">闭包是JavaScript中一个非常重要的概念，它允许函数访问并操作函数外部的变量。本文将深入探讨闭包的工作原理、常见应用场景以及潜在的性能问题，帮助你更好地理解和使用这一强大特性。</p>
+                        <a href="#" class="read-more">继续阅读</a>
+                    </div>
+                </article>
+                
+                <article class="post">
+                    <div class="post-image">
+                        <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1174&q=80" alt="响应式设计">
+                    </div>
+                    <div class="post-content">
+                        <div class="post-meta">
+                            <span><i class="far fa-calendar"></i> 2023年10月10日</span>
+                            <span><i class="far fa-folder"></i> 响应式设计</span>
+                            <span><i class="far fa-comments"></i> 8条评论</span>
+                        </div>
+                        <h3 class="post-title"><a href="#">现代CSS布局技术：Flexbox与Grid实战指南</a></h3>
+                        <p class="post-excerpt">Flexbox和CSS Grid是现代网页布局的两大核心技术。本文将通过实际案例对比分析这两种布局技术的优缺点，展示如何在不同场景下选择合适的技术，并分享一些实用的布局技巧。</p>
+                        <a href="#" class="read-more">继续阅读</a>
+                    </div>
+                </article>
+                
+                <article class="post">
+                    <div class="post-image">
+                        <img src="https://images.unsplash.com/photo-1627398242454-45a1465c2479?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1174&q=80" alt="网页性能优化">
+                    </div>
+                    <div class="post-content">
+                        <div class="post-meta">
+                            <span><i class="far fa-calendar"></i> 2023年10月5日</span>
+                            <span><i class="far fa-folder"></i> 性能优化</span>
+                            <span><i class="far fa-comments"></i> 15条评论</span>
+                        </div>
+                        <h3 class="post-title"><a href="#">前端性能优化实战：从加载到渲染的全方位优化策略</a></h3>
+                        <p class="post-excerpt">网页性能直接影响用户体验和SEO排名。本文将介绍从资源加载、代码执行到页面渲染的全链路性能优化策略，包括图片优化、代码分割、懒加载等实用技巧，帮助你打造极速网页体验。</p>
+                        <a href="#" class="read-more">继续阅读</a>
+                    </div>
+                </article>
+            </section>
+            
+            <!-- 侧边栏 -->
+            <aside class="sidebar">
+                <!-- 关于我 -->
+                <div class="sidebar-widget about-widget">
+                    <h3 class="widget-title">关于博主</h3>
+                    <p>热爱前端技术的开发者，专注于Web性能优化和用户体验设计。热衷于分享技术知识和实践经验。</p>
+                    <p>在这个博客中，我将记录和分享我的学习历程、技术思考和项目经验。</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-weixin"></i></a>
+                    </div>
+                </div>
+                
+                <!-- 文章分类 -->
+                <div class="sidebar-widget categories-widget">
+                    <h3 class="widget-title">文章分类</h3>
+                    <ul class="categories-list">
+                        <li><a href="#">前端开发 <span>15</span></a></li>
+                        <li><a href="#">JavaScript <span>22</span></a></li>
+                        <li><a href="#">CSS技术 <span>18</span></a></li>
+                        <li><a href="#">性能优化 <span>9</span></a></li>
+                        <li><a href="#">响应式设计 <span>12</span></a></li>
+                        <li><a href="#">工具推荐 <span>7</span></a></li>
+                    </ul>
+                </div>
+                
+                <!-- 热门文章 -->
+                <div class="sidebar-widget popular-posts-widget">
+                    <h3 class="widget-title">热门文章</h3>
+                    <ul class="popular-posts-list">
+                        <li>
+                            <a href="#">
+                                <div class="popular-post">
+                                    <img src="https://images.unsplash.com/photo-1581276879432-15e50529f34b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="TypeScript">
+                                    <div class="popular-post-content">
+                                        <h4>TypeScript入门与进阶实践</h4>
+                                        <span><i class="far fa-calendar"></i> 2023年9月20日</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <div class="popular-post">
+                                    <img src="https://images.unsplash.com/photo-1623282033815-40c05a962d3c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Vue.js">
+                                    <div class="popular-post-content">
+                                        <h4>Vue 3.0 Composition API详解</h4>
+                                        <span><i class="far fa-calendar"></i> 2023年9月15日</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <div class="popular-post">
+                                    <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="React">
+                                    <div class="popular-post-content">
+                                        <h4>React Hooks最佳实践指南</h4>
+                                        <span><i class="far fa-calendar"></i> 2023年9月10日</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </main>
+    
+    <!-- 页脚区域 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>技术博客</h3>
+                    <p>分享前端开发、Web性能优化和用户体验设计等相关技术内容。</p>
+                    <p>记录学习历程，传播技术知识。</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>快速链接</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> 首页</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> 关于我</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> 所有文章</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> 项目展示</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>联系我</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-envelope"></i> contact@example.com</a></li>
+                        <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                        <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                        <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 技术博客. 保留所有权利. 设计制作 by 博主</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 移动端菜单切换
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mainNav = document.getElementById('mainNav');
+        
+        mobileMenuBtn.addEventListener('click', function() {
+            mainNav.classList.toggle('show');
+        });
+        
+        // 点击菜单项后关闭移动菜单
+        const navLinks = document.querySelectorAll('nav a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    mainNav.classList.remove('show');
+                }
+            });
+        });
+        
+        // 文章卡片悬停效果增强
+        const posts = document.querySelectorAll('.post');
+        posts.forEach(post => {
+            post.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px)';
+            });
+            
+            post.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
