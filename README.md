@@ -1,5 +1,5 @@
 # 欢迎来到这里！
-```json
+```geojson
 {
   "type": "FeatureCollection",
   "name": "china_outline",
@@ -167,4 +167,5 @@
   ]
 }
 ```
+
 
