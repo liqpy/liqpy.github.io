@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>"
+      type="image/svg+xml"
+    />
+    <title>时钟</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+        color: #fff;
+        overflow: hidden;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+        padding: 30px;
+      }
+      .clock-container {
+        position: relative;
+        width: 350px;
+        height: 350px;
+      }
+      canvas {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .digital-clock {
+        font-size: 3.5rem;
+        font-weight: 300;
+        letter-spacing: 3px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 20px 40px;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .date-display {
+        font-size: 1.5rem;
+        margin-top: 10px;
+        opacity: 0.8;
+        text-align: center;
+      }
+      .title {
+        font-size: 2.8rem;
+        font-weight: 300;
+        margin-bottom: 20px;
+        text-align: center;
+        text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+      .mode-toggle {
+        margin-top: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .mode-toggle:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
+      .footer {
+        margin-top: 40px;
+        text-align: center;
+        opacity: 0.7;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="clock-container">
+        <canvas id="clockCanvas" width="350" height="350"></canvas>
+      </div>
+
+      <div class="digital-clock">
+        <div id="time" style="text-align: center">00:00:00</div>
+        <div class="date-display" id="date">2023年11月15日 星期三</div>
+      </div>
+
+      <button class="mode-toggle" id="themeToggle">切换浅色模式</button>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const canvas = document.getElementById("clockCanvas");
+        const ctx = canvas.getContext("2d");
+        const timeElement = document.getElementById("time");
+        const dateElement = document.getElementById("date");
+        const themeToggle = document.getElementById("themeToggle");
+
+        let clockSize = Math.min(canvas.width, canvas.height);
+        let centerX = canvas.width / 2;
+        let centerY = canvas.height / 2;
+        let radius = clockSize / 2 - 20;
+        let isDarkMode = true;
+
+        // 星期几的中文表示
+        const dayNames = [
+          "星期日",
+          "星期一",
+          "星期二",
+          "星期三",
+          "星期四",
+          "星期五",
+          "星期六",
+        ];
+
+        // 月份的中文表示
+        const monthNames = [
+          "一月",
+          "二月",
+          "三月",
+          "四月",
+          "五月",
+          "六月",
+          "七月",
+          "八月",
+          "九月",
+          "十月",
+          "十一月",
+          "十二月",
+        ];
+
+        // 绘制时钟
+        function drawClock() {
+          // 清除画布
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // 绘制外圆
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+          ctx.fillStyle = isDarkMode
+            ? "rgba(40, 40, 60, 0.8)"
+            : "rgba(250, 250, 250, 0.9)";
+          ctx.fill();
+          ctx.strokeStyle = isDarkMode
+            ? "rgba(100, 100, 200, 0.3)"
+            : "rgba(100, 100, 200, 0.2)";
+          ctx.lineWidth = 8;
+          ctx.stroke();
+
+          // 绘制刻度
+          drawHourMarkers();
+
+          // 绘制品牌文字
+          ctx.font = "14px -apple-system, BlinkMacSystemFont";
+          ctx.fillStyle = isDarkMode
+            ? "rgba(200, 200, 200, 0.7)"
+            : "rgba(100, 100, 100, 0.7)";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("时间", centerX, centerY + radius - 60);
+
+          // 获取当前时间
+          const now = new Date();
+          const hours = now.getHours() % 12;
+          const minutes = now.getMinutes();
+          const seconds = now.getSeconds();
+          const milliseconds = now.getMilliseconds();
+
+          // 绘制时针
+          drawHand(
+            hours * 30 + minutes * 0.5,
+            radius * 0.5,
+            8,
+            isDarkMode ? "#fff" : "#333"
+          );
+
+          // 绘制分针
+          drawHand(
+            minutes * 6 + seconds * 0.1,
+            radius * 0.7,
+            5,
+            isDarkMode ? "#fff" : "#333"
+          );
+
+          // 绘制秒针
+          drawHand(
+            seconds * 6 + milliseconds * 0.006,
+            radius * 0.8,
+            2,
+            "#ff3b30"
+          );
+
+          // 绘制中心点
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+          ctx.fillStyle = "#ff3b30";
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, 3, 0, 2 * Math.PI);
+          ctx.fillStyle = isDarkMode ? "#333" : "#fff";
+          ctx.fill();
+
+          // 更新数字时钟
+          updateDigitalClock(now);
+        }
+
+        // 绘制时钟刻度
+        function drawHourMarkers() {
+          for (let i = 0; i < 12; i++) {
+            const angle = (i * 30 * Math.PI) / 180;
+            const x1 = centerX + (radius - 20) * Math.sin(angle);
+            const y1 = centerY - (radius - 20) * Math.cos(angle);
+            const x2 = centerX + (radius - 5) * Math.sin(angle);
+            const y2 = centerY - (radius - 5) * Math.cos(angle);
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = isDarkMode
+              ? "rgba(255, 255, 255, 0.8)"
+              : "rgba(0, 0, 0, 0.6)";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // 绘制小时数字
+            const textX = centerX + (radius - 35) * Math.sin(angle);
+            const textY = centerY - (radius - 35) * Math.cos(angle);
+            ctx.font = "16px -apple-system, BlinkMacSystemFont";
+            ctx.fillStyle = isDarkMode ? "#fff" : "#000";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(i === 0 ? "12" : i.toString(), textX, textY);
+          }
+
+          // 绘制分钟刻度
+          for (let i = 0; i < 60; i++) {
+            if (i % 5 !== 0) {
+              // 跳过小时刻度位置
+              const angle = (i * 6 * Math.PI) / 180;
+              const x1 = centerX + (radius - 10) * Math.sin(angle);
+              const y1 = centerY - (radius - 10) * Math.cos(angle);
+              const x2 = centerX + (radius - 5) * Math.sin(angle);
+              const y2 = centerY - (radius - 5) * Math.cos(angle);
+
+              ctx.beginPath();
+              ctx.moveTo(x1, y1);
+              ctx.lineTo(x2, y2);
+              ctx.strokeStyle = isDarkMode
+                ? "rgba(255, 255, 255, 0.4)"
+                : "rgba(0, 0, 0, 0.3)";
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            }
+          }
+        }
+
+        // 绘制指针
+        function drawHand(angle, length, width, color) {
+          const radian = ((angle - 90) * Math.PI) / 180;
+          const x = centerX + length * Math.cos(radian);
+          const y = centerY + length * Math.sin(radian);
+
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY);
+          ctx.lineTo(x, y);
+          ctx.strokeStyle = color;
+          ctx.lineWidth = width;
+          ctx.lineCap = "round";
+          ctx.stroke();
+        }
+
+        // 更新数字时钟
+        function updateDigitalClock(now) {
+          const hours = String(now.getHours()).padStart(2, "0");
+          const minutes = String(now.getMinutes()).padStart(2, "0");
+          const seconds = String(now.getSeconds()).padStart(2, "0");
+
+          timeElement.textContent = `${hours}:${minutes}:${seconds}`;
+
+          const year = now.getFullYear();
+          const month = now.getMonth();
+          const day = now.getDate();
+          const dayName = dayNames[now.getDay()];
+
+          dateElement.textContent = `${year}年 ${monthNames[month]} ${day}日 ${dayName}`;
+        }
+
+        // 切换主题
+        function toggleTheme() {
+          isDarkMode = !isDarkMode;
+
+          if (isDarkMode) {
+            document.body.style.background =
+              "linear-gradient(135deg, #2c3e50, #1a1a2e)";
+            document.body.style.color = "#fff";
+            themeToggle.textContent = "切换浅色模式";
+          } else {
+            document.body.style.background =
+              "linear-gradient(135deg, #f5f7fa, #7b7c7d)";
+            document.body.style.color = "#333";
+            themeToggle.textContent = "切换深色模式";
+          }
+        }
+
+        // 添加事件监听
+        themeToggle.addEventListener("click", toggleTheme);
+
+        // 初始化并启动时钟
+        function init() {
+          // 调整Canvas大小以保持清晰度
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = 350 * dpr;
+          canvas.height = 350 * dpr;
+          ctx.scale(dpr, dpr);
+
+          // 初始绘制
+          drawClock();
+
+          // 每秒更新
+          setInterval(drawClock, 50);
+        }
+
+        // 启动时钟
+        init();
+      });
+    </script>
+  </body>
+</html>
