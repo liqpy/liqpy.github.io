@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI视频生成平台</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            color: #3b82f6;
+            font-size: 28px;
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #60a5fa, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background-color: #1e293b;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #10b981;
+        }
+        
+        .status-dot.processing {
+            background-color: #f59e0b;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background-color: #1e293b;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .panel-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-title i {
+            color: #60a5fa;
+        }
+        
+        .form-group {
+            margin-bottom: 22px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+        
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 15px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .slider-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 500;
+            color: #60a5fa;
+        }
+        
+        .slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 6px;
+            background: #334155;
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .checkbox-input {
+            width: 18px;
+            height: 18px;
+            accent-color: #3b82f6;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-secondary {
+            background-color: #334155;
+            color: #e2e8f0;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #475569;
+        }
+        
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .video-placeholder {
+            flex: 1;
+            background: linear-gradient(145deg, #0f172a, #1e293b);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #475569;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .video-placeholder i {
+            font-size: 70px;
+            color: #475569;
+            margin-bottom: 15px;
+        }
+        
+        .video-placeholder-text {
+            font-size: 16px;
+            color: #94a3b8;
+        }
+        
+        .video-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .video-preview.active {
+            display: block;
+        }
+        
+        .generating-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 12px;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #334155;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .progress-info {
+            text-align: center;
+        }
+        
+        .progress-text {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .progress-bar {
+            width: 80%;
+            height: 8px;
+            background-color: #334155;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .preview-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .history-section {
+            background-color: #1e293b;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .history-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .history-title i {
+            color: #60a5fa;
+        }
+        
+        .history-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .history-item {
+            background-color: #0f172a;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        
+        .history-item:hover {
+            border-color: #3b82f6;
+            transform: translateY(-3px);
+        }
+        
+        .history-thumbnail {
+            width: 100%;
+            height: 120px;
+            background-color: #1e293b;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: #475569;
+        }
+        
+        .history-info h4 {
+            font-size: 14px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .history-info p {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        
+        .empty-history {
+            text-align: center;
+            padding: 30px;
+            color: #94a3b8;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #334155;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .actions-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            padding: 16px 24px;
+            background-color: #10b981;
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background-color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <!-- 头部 -->
+            <header class="header">
+                <div class="logo">
+                    <i class="fas fa-video logo-icon"></i>
+                    <div class="logo-text">AI Video Studio</div>
+                </div>
+                <div class="status-bar">
+                    <div class="status">
+                        <div class="status-dot" :class="{ 'processing': isGenerating }"></div>
+                        <span>{{ statusText }}</span>
+                    </div>
+                    <button class="btn btn-secondary" @click="clearForm">
+                        <i class="fas fa-redo"></i>
+                        重置
+                    </button>
+                </div>
+            </header>
+            
+            <!-- 主要内容区域 -->
+            <div class="main-content">
+                <!-- 左侧配置面板 -->
+                <div class="panel">
+                    <h3 class="panel-title">
+                        <i class="fas fa-sliders-h"></i>
+                        视频参数设置
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">视频描述</label>
+                        <textarea 
+                            v-model="form.prompt" 
+                            class="form-textarea" 
+                            placeholder="描述你想要生成的视频内容，越详细越好..."
+                        ></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">视频时长</label>
+                            <div class="slider-container">
+                                <input 
+                                    type="range" 
+                                    v-model="form.duration" 
+                                    min="5" 
+                                    max="60" 
+                                    step="5" 
+                                    class="slider"
+                                >
+                                <span class="slider-value">{{ form.duration }}秒</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">视频分辨率</label>
+                            <select v-model="form.resolution" class="form-select">
+                                <option value="480p">480p (SD)</option>
+                                <option value="720p">720p (HD)</option>
+                                <option value="1080p">1080p (Full HD)</option>
+                                <option value="4k">4K (Ultra HD)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">视频风格</label>
+                            <select v-model="form.style" class="form-select">
+                                <option value="realistic">写实风格</option>
+                                <option value="anime">动漫风格</option>
+                                <option value="cinematic">电影风格</option>
+                                <option value="cartoon">卡通风格</option>
+                                <option value="watercolor">水彩风格</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">帧率 (FPS)</label>
+                            <div class="slider-container">
+                                <input 
+                                    type="range" 
+                                    v-model="form.fps" 
+                                    min="24" 
+                                    max="60" 
+                                    step="1" 
+                                    class="slider"
+                                >
+                                <span class="slider-value">{{ form.fps }} FPS</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">视频类型</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" v-model="form.options" value="voiceover" class="checkbox-input">
+                                添加配音
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" v-model="form.options" value="subtitles" class="checkbox-input">
+                                添加字幕
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" v-model="form.options" value="backgroundMusic" class="checkbox-input">
+                                背景音乐
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" v-model="form.options" value="transitions" class="checkbox-input">
+                                转场效果
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">负面提示 (不希望出现的元素)</label>
+                        <textarea 
+                            v-model="form.negativePrompt" 
+                            class="form-textarea" 
+                            placeholder="描述你不希望在视频中出现的内容..."
+                            rows="3"
+                        ></textarea>
+                    </div>
+                    
+                    <div class="actions-row">
+                        <button class="btn btn-primary" @click="generateVideo" :disabled="isGenerating">
+                            <i class="fas fa-bolt"></i>
+                            {{ isGenerating ? '生成中...' : '生成视频' }}
+                        </button>
+                        <button class="btn btn-secondary" @click="previewSettings">
+                            <i class="fas fa-eye"></i>
+                            预览设置
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 右侧预览面板 -->
+                <div class="panel preview-container">
+                    <h3 class="panel-title">
+                        <i class="fas fa-play-circle"></i>
+                        视频预览
+                    </h3>
+                    
+                    <div class="video-placeholder">
+                        <div v-if="isGenerating" class="generating-overlay">
+                            <div class="spinner"></div>
+                            <div class="progress-info">
+                                <p class="progress-text">{{ progressText }}</p>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" :style="{ width: generationProgress + '%' }"></div>
+                                </div>
+                                <p class="progress-text">预计剩余时间: {{ estimatedTime }}秒</p>
+                            </div>
+                        </div>
+                        
+                        <i v-if="!currentVideo" class="fas fa-film"></i>
+                        <video 
+                            v-if="currentVideo" 
+                            :src="currentVideo" 
+                            class="video-preview active" 
+                            controls
+                            autoplay
+                            loop
+                        ></video>
+                        
+                        <p v-if="!currentVideo" class="video-placeholder-text">
+                            生成的视频将在此处显示
+                        </p>
+                    </div>
+                    
+                    <div v-if="currentVideo" class="preview-controls">
+                        <button class="btn btn-secondary" @click="downloadVideo">
+                            <i class="fas fa-download"></i>
+                            下载视频
+                        </button>
+                        <button class="btn btn-secondary" @click="shareVideo">
+                            <i class="fas fa-share-alt"></i>
+                            分享
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 历史记录 -->
+            <div class="history-section">
+                <h3 class="history-title">
+                    <i class="fas fa-history"></i>
+                    生成历史
+                </h3>
+                
+                <div class="history-list" v-if="history.length > 0">
+                    <div 
+                        v-for="(item, index) in history" 
+                        :key="index" 
+                        class="history-item"
+                        @click="loadFromHistory(item)"
+                    >
+                        <div class="history-thumbnail">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="history-info">
+                            <h4>{{ item.prompt.substring(0, 30) }}{{ item.prompt.length > 30 ? '...' : '' }}</h4>
+                            <p>{{ item.timestamp }} | {{ item.duration }}秒 | {{ item.resolution }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div v-else class="empty-history">
+                    <i class="fas fa-clock fa-2x" style="margin-bottom: 15px;"></i>
+                    <p>暂无生成历史</p>
+                </div>
+            </div>
+            
+            <!-- 底部信息 -->
+            <footer class="footer">
+                <p>AI Video Studio &copy; 2023 | 使用先进AI技术生成高质量视频内容</p>
+                <p style="margin-top: 5px; font-size: 12px;">当前服务状态: 正常 | 已生成 {{ totalGenerated }} 个视频</p>
+            </footer>
+        </div>
+        
+        <!-- 通知 -->
+        <div :class="['notification', notification.type]" :class="{ show: showNotification }">
+            <i :class="notification.icon"></i>
+            <span>{{ notification.message }}</span>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+        
+        createApp({
+            setup() {
+                // 表单数据
+                const form = ref({
+                    prompt: '一只蝴蝶在花丛中飞舞，阳光透过树叶洒下斑驳光影，慢镜头特写',
+                    duration: 15,
+                    resolution: '1080p',
+                    style: 'cinematic',
+                    fps: 30,
+                    options: ['voiceover', 'backgroundMusic', 'transitions'],
+                    negativePrompt: '模糊、低质量、水印'
+                });
+                
+                // 状态数据
+                const isGenerating = ref(false);
+                const generationProgress = ref(0);
+                const currentVideo = ref(null);
+                const history = ref([]);
+                const totalGenerated = ref(0);
+                const showNotification = ref(false);
+                const notification = ref({
+                    message: '',
+                    type: 'success',
+                    icon: 'fas fa-check-circle'
+                });
+                
+                // 模拟视频数据
+                const sampleVideos = [
+                    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+                    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
+                ];
+                
+                // 计算属性
+                const statusText = computed(() => {
+                    return isGenerating.value ? '正在生成视频...' : '准备生成';
+                });
+                
+                const progressText = computed(() => {
+                    const stages = ['初始化模型', '生成场景', '渲染画面', '合成视频', '后期处理'];
+                    const stageIndex = Math.floor(generationProgress.value / 20);
+                    return `${stages[stageIndex]} (${Math.floor(generationProgress.value)}%)`;
+                });
+                
+                const estimatedTime = computed(() => {
+                    return Math.max(1, Math.floor((100 - generationProgress.value) / 10));
+                });
+                
+                // 方法
+                const showNotify = (message, type = 'success') => {
+                    notification.value = {
+                        message,
+                        type,
+                        icon: type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'
+                    };
+                    showNotification.value = true;
+                    
+                    setTimeout(() => {
+                        showNotification.value = false;
+                    }, 3000);
+                };
+                
+                const generateVideo = () => {
+                    if (!form.value.prompt.trim()) {
+                        showNotify('请输入视频描述', 'error');
+                        return;
+                    }
+                    
+                    isGenerating.value = true;
+                    generationProgress.value = 0;
+                    
+                    // 模拟生成过程
+                    const interval = setInterval(() => {
+                        generationProgress.value += Math.random() * 15;
+                        
+                        if (generationProgress.value >= 100) {
+                            generationProgress.value = 100;
+                            clearInterval(interval);
+                            
+                            // 模拟生成完成
+                            setTimeout(() => {
+                                isGenerating.value = false;
+                                
+                                // 随机选择一个示例视频作为生成结果
+                                const randomIndex = Math.floor(Math.random() * sampleVideos.length);
+                                currentVideo.value = sampleVideos[randomIndex];
+                                
+                                // 添加到历史记录
+                                const historyItem = {
+                                    ...form.value,
+                                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                                    videoUrl: currentVideo.value
+                                };
+                                
+                                history.value.unshift(historyItem);
+                                totalGenerated.value++;
+                                
+                                showNotify(`视频生成成功！耗时约${form.value.duration}秒`);
+                            }, 500);
+                        }
+                    }, 500);
+                };
+                
+                const clearForm = () => {
+                    form.value = {
+                        prompt: '',
+                        duration: 15,
+                        resolution: '1080p',
+                        style: 'cinematic',
+                        fps: 30,
+                        options: [],
+                        negativePrompt: ''
+                    };
+                    showNotify('表单已重置');
+                };
+                
+                const previewSettings = () => {
+                    const settings = `
+视频描述: ${form.value.prompt}
+视频时长: ${form.value.duration}秒
+分辨率: ${form.value.resolution}
+风格: ${form.value.style}
+帧率: ${form.value.fps} FPS
+附加选项: ${form.value.options.join(', ') || '无'}
+负面提示: ${form.value.negativePrompt || '无'}
+                    `.trim();
+                    
+                    alert(settings);
+                };
+                
+                const downloadVideo = () => {
+                    if (!currentVideo.value) {
+                        showNotify('没有可下载的视频', 'error');
+                        return;
+                    }
+                    
+                    showNotify('开始下载视频...');
+                    // 在实际应用中，这里应该触发视频下载
+                };
+                
+                const shareVideo = () => {
+                    if (!currentVideo.value) {
+                        showNotify('没有可分享的视频', 'error');
+                        return;
+                    }
+                    
+                    showNotify('已复制视频链接到剪贴板');
+                    // 在实际应用中，这里应该复制视频链接或打开分享对话框
+                };
+                
+                const loadFromHistory = (item) => {
+                    form.value = { ...item };
+                    currentVideo.value = item.videoUrl;
+                    showNotify('已加载历史记录中的设置');
+                };
+                
+                // 初始化
+                onMounted(() => {
+                    // 加载一些示例历史记录
+                    history.value = [
+                        {
+                            prompt: '日落时分的海滩，海浪轻轻拍打沙滩，海鸥飞过',
+                            duration: 20,
+                            resolution: '1080p',
+                            style: 'realistic',
+                            timestamp: '10:30',
+                            videoUrl: sampleVideos[0]
+                        },
+                        {
+                            prompt: '未来城市夜景，飞行汽车穿梭于摩天大楼之间',
+                            duration: 25,
+                            resolution: '4k',
+                            style: 'cinematic',
+                            timestamp: '09:15',
+                            videoUrl: sampleVideos[1]
+                        },
+                        {
+                            prompt: '樱花树下，花瓣随风飘落，日式庭院',
+                            duration: 18,
+                            resolution: '720p',
+                            style: 'anime',
+                            timestamp: '昨天 14:20',
+                            videoUrl: sampleVideos[2]
+                        }
+                    ];
+                    
+                    totalGenerated.value = 12;
+                });
+                
+                return {
+                    form,
+                    isGenerating,
+                    generationProgress,
+                    currentVideo,
+                    history,
+                    totalGenerated,
+                    showNotification,
+                    notification,
+                    statusText,
+                    progressText,
+                    estimatedTime,
+                    generateVideo,
+                    clearForm,
+                    previewSettings,
+                    downloadVideo,
+                    shareVideo,
+                    loadFromHistory,
+                    showNotify
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
